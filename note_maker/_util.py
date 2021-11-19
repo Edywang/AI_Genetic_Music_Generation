@@ -32,9 +32,11 @@ def add_notes(midi, track, channel, notes, time, duration, volume):
     for note in notes:
         midi.addNote(track, channel, note, time, duration, volume)
 
+#we don't need this function tho
 def random_note():
-    lst = list(notes.items())
-    return (random.choice(lst)[1])
+    #lst = list(notes.items())
+    #return (random.choice(lst)[1] + 60)
+    return (random_root())
 
 def random_common_chord(root):
     return random.choice(common_chords)(root)
@@ -154,3 +156,19 @@ def suspended_fourth_flat_three(root):
 
 def suspended_fourth_sharp_three(root):
     return [root, root + 5, root + 8, root + 1]
+
+#returns true if there is overlap, false if there isn't OR there are 2 notes in a row
+#n1 and n2 represent lists of notes (can be only 1 note)
+def checkingOverlap(n1, n2):
+    first = n1
+    second = n2
+    if len(n1) == 1 and len(n2) == 1:
+        return False
+    if len(n2) == 1:
+        first = n2
+        second = n1
+    for n in first:
+        for i in range(0,2):
+            if n >= second[i] and n <= second[i+1]:
+                return True
+    return False

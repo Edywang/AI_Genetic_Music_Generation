@@ -13,6 +13,7 @@ MyMIDI = MIDIFile(1) # One track, defaults to format 1 (tempo track
                      # automatically created)
 MyMIDI.addTempo(track,time, tempo)
 
+'''
 add_notes(MyMIDI, track, channel, major_triad(note("C", 5)), time, duration, volume)
 time += 1
 add_notes(MyMIDI, track, channel, minor_triad(note("D", 5)), time, duration, volume)
@@ -20,9 +21,29 @@ time += 1
 add_notes(MyMIDI, track, channel, major_triad(note("C", 5)), time, duration, volume)
 time += 1
 add_notes(MyMIDI, track, channel, major_seventh_suspended(note("C", 5)), time, duration, volume)
+'''
 
-for i in range(10):
-    add_notes(MyMIDI, track, channel, random_common_chord(random_root()), time + i, duration, volume)
+musicStuff = []     #list of notes and chords
+for i in range(200):    #origionally 10
+    rando = random.randint(0,10)
+    if rando:
+        #add_notes(MyMIDI, track, channel, random_common_chord(random_root()), time + i, duration, volume)
+        #for x in range(3):
+        musicStuff.append(random_common_chord(random_root()))
+    else:
+        #add_notes(MyMIDI, track, channel, [random_note()], time + i, duration, volume)
+        musicStuff.append([random_root()])
+
+song = [random.choice(musicStuff)]
+musicStuff.remove(song[0])
+for vals in musicStuff:
+    if checkingOverlap(song[-1], vals):
+        song.append(vals)
+
+i = 0     
+for val in song:    #so we don't forget to add the very first val in song
+    add_notes(MyMIDI, track, channel, val, time + i, duration, volume)
+    i = i + 1
 
 '''
 for pitch in degrees:
