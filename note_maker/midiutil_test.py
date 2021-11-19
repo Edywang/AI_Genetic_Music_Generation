@@ -12,8 +12,8 @@ def write_song(name, song, MyMIDI):
         MyMIDI.writeFile(output_file)
 
 def make_song(note_count):
-    # song = []
-    # notes_so_far = 0
+    song = []
+    notes_so_far = 0
     
     while notes_so_far != note_count:
         note_gen = []     #list of notes and chords
