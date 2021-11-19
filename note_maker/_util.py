@@ -23,7 +23,8 @@ def note(Letter, Octave):
     return notes.get(Letter) + (Octave * 12)
 
 def random_root():
-    return random.randint(0, 127-11)
+    # return random.randint(0, 127-11)
+    return random.randint(36, 79)
 
 def note_names():
     return notes.keys()

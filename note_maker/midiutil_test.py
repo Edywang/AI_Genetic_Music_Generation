@@ -1,49 +1,77 @@
 from midiutil import MIDIFile
 import random
 from _util import *
-degrees  = [60, 62, 64, 65, 67, 69, 71] # MIDI note number in the 5th octave
+
+def write_song(name, song, MyMIDI):
+    i = 0
+    for val in song:    #so we don't forget to add the very first val in song
+        add_notes(MyMIDI, track, channel, val, time + i, duration, volume)
+        i = i + 1
+
+    with open(name, "wb") as output_file:
+        MyMIDI.writeFile(output_file)
+
+def make_song(note_count):
+    # song = []
+    # notes_so_far = 0
+    
+    while notes_so_far != note_count:
+        note_gen = []     #list of notes and chords
+        for i in range(note_count*10): # loop note_count * 10 times producing random chords/notes
+            rando = random.randint(0,10)
+            if rando: # if rando != 0, add a chord
+                note_gen.append(random_common_chord(random_root()))
+            else: # otherwise, add a single note
+                note_gen.append([random_root()])
+
+        if not notes_so_far:
+            song.append(random.choice(note_gen))
+            note_gen.remove(song[0])
+            notes_so_far += 1
+
+        for vals in note_gen:
+            if checkingOverlap(song[-1], vals):
+                song.append(vals)
+                notes_so_far += 1
+            if notes_so_far == note_count:
+                break
+                
+    return song
+
+# degrees  = [60, 62, 64, 65, 67, 69, 71] # MIDI note number in the 5th octave
 track    = 0
 channel  = 0
 time     = 0   # In beats (used to control when to play the next note)
-duration = 1   # In beats
-tempo    = 60  # In BPM
-volume   = 100 # 0-127, as per the MIDI standard
+tracks   = 1
+duration = 1
+tempo    = 60
+volume   = 100
 
-MyMIDI = MIDIFile(1) # One track, defaults to format 1 (tempo track
-                     # automatically created)
-MyMIDI.addTempo(track,time, tempo)
+MyMIDI1 = MIDIFile(tracks) # One track, defaults to format 1 (tempo track automatically created)
+MyMIDI1.addTempo(track, time, tempo)
+s1 = make_song(15) # will return a list of notes/chords for adding to the song
 
-'''
-add_notes(MyMIDI, track, channel, major_triad(note("C", 5)), time, duration, volume)
-time += 1
-add_notes(MyMIDI, track, channel, minor_triad(note("D", 5)), time, duration, volume)
-time += 1
-add_notes(MyMIDI, track, channel, major_triad(note("C", 5)), time, duration, volume)
-time += 1
-add_notes(MyMIDI, track, channel, major_seventh_suspended(note("C", 5)), time, duration, volume)
-'''
+MyMIDI2 = MIDIFile(tracks) # One track, defaults to format 1 (tempo track automatically created)
+MyMIDI2.addTempo(track, time, tempo)
+s2 = make_song(15)
 
-musicStuff = []     #list of notes and chords
-for i in range(200):    #origionally 10
-    rando = random.randint(0,10)
-    if rando:
-        #add_notes(MyMIDI, track, channel, random_common_chord(random_root()), time + i, duration, volume)
-        #for x in range(3):
-        musicStuff.append(random_common_chord(random_root()))
-    else:
-        #add_notes(MyMIDI, track, channel, [random_note()], time + i, duration, volume)
-        musicStuff.append([random_root()])
+split_gamut = 5
+split_variance = int(len(s1)/split_gamut) #in the example, this is 3
+split_pt = split_variance * int(split_gamut/2)
+split_pt += random.randint(1,split_variance+1)
 
-song = [random.choice(musicStuff)]
-musicStuff.remove(song[0])
-for vals in musicStuff:
-    if checkingOverlap(song[-1], vals):
-        song.append(vals)
+MyMIDI3 = MIDIFile(tracks) # One track, defaults to format 1 (tempo track automatically created)
+MyMIDI3.addTempo(track, time, tempo)
+s3 = s1[:split_pt] + s2[split_pt:]
 
-i = 0     
-for val in song:    #so we don't forget to add the very first val in song
-    add_notes(MyMIDI, track, channel, val, time + i, duration, volume)
-    i = i + 1
+MyMIDI4 = MIDIFile(tracks) # One track, defaults to format 1 (tempo track automatically created)
+MyMIDI4.addTempo(track, time, tempo)
+s4 = s2[:split_pt] + s1[split_pt:]
+
+write_song('song1.mid', s1, MyMIDI1)
+write_song('song2.mid', s2, MyMIDI2)
+write_song('song3.mid', s3, MyMIDI3)
+write_song('song4.mid', s4, MyMIDI4)
 
 '''
 for pitch in degrees:
@@ -51,8 +79,6 @@ for pitch in degrees:
     #MyMIDI.addNote(track, channel, degrees[random.randint(0,len(degrees)-1)], time, duration, volume)
     time = time + 1
 '''
-with open("rand-test.mid", "wb") as output_file:
-    MyMIDI.writeFile(output_file)
 
 '''
 Fitness stuff:
