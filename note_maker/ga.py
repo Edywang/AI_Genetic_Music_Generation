@@ -3,7 +3,7 @@ import random
 from _util import *
 
 NOTES_PER_SONG = 60
-
+C,CS,D,DS,E,F,FS,G,GS,A,AS,B = 0,1,2,3,4,5,6,7,8,9,10,11
 # add_song_to_MIDI does the legwork of adding a list of notes/chords to the MIDIFile object.
 def add_song_to_MIDI(MyMIDI, song, track, channel, time, duration, volume):
     i = 0
@@ -52,12 +52,12 @@ def make_song(note_count):
 def generate_MIDI(songs, channel=0, tracks=1, duration=1, times=[0], tempos=[60], volume=100):
     # degrees  = [60, 62, 64, 65, 67, 69, 71] # MIDI note number in the 5th octave
 
-    MyMIDI = MIDIFILE(tracks)
+    MyMIDI = MIDIFile(tracks)
 
     for i in range(0,len(songs)):
         track = i
         MyMIDI.addTempo(track, times[i], tempos[i])
-        add_song_to_MIDI(MyMIDI, song, track, channel, times[i], duration, volume)
+        add_song_to_MIDI(MyMIDI, songs[i], track, channel, times[i], duration, volume)
 
     return MyMIDI
 
@@ -79,6 +79,10 @@ def combine_songs(song1, song2, split_pt=-1):
 # def combine_multitempo_songs(song1, song2, tempo1, tempo2, start1, start2, split_pt=-1)
 # TODO, if you want: 
 # takes two note lists and their respective tempos, and combines them into a single MIDIFile object
+# did we wanna combine them by alternating notes? Or just by putting in on the end
+# there is a note limit (of three) with midi, so we might already be at the max before starting
+def combine_multitempo_songs(song1, song2, tempo1, tempo2, start1, start2, split_pt=-1):
+    pass
 
 # TODO 
 # initial: create X songs using make_song
@@ -87,7 +91,18 @@ def combine_songs(song1, song2, split_pt=-1):
     # check the fitness of each one, sort them in order of fitness (highest to lowest?)
     # for each song, combine it with the song next to it (until we have X/2 children)
     # create a new genome with all the new children songs and most fit parents
-    
+
+#   attempt at fitness function
+def checkFitness(song):
+    #song is a 2D array of chords
+    #checking for good closer chords
+    if len(song[-1])==3:
+        if song[-1][0] % 12 == G and song[-1][1] % 12 == B and song[-1][2] % 12 == D:
+            pass
+        if song[-1][0] % 12 == F and song[-1][1] % 12 == A and song[-1][2] % 12 == C:
+            pass
+
+
 # TODO: pattern matching for songs, and repetition of the same pattern
 # Music sounds good when it's not 50 different chords/notes pulled from a hat
 # take the first 2/4/8/16 notes, and repeat them a second time. If it's a fit result, add more of those notes 
@@ -129,6 +144,10 @@ Fitness stuff:
 
     We also want to limit repititon of stuff too
 '''
-
+song = [major_triad(50),modified_major_triad1(50),modified_major_triad2(50)]
+myMidi = generate_MIDI([song])
+write_song_to_file(myMidi,"test.mid")
+#song = make_song(NOTES_PER_SONG)    #creates song
+#checkFitness(song)
 
 

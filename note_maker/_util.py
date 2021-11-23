@@ -45,6 +45,12 @@ def random_common_chord(root):
 def major_triad(root):
     return [root, root + 4, root + 7]
 
+def modified_major_triad1(root):
+    return [root-3, root, root + 4, root + 7]
+
+def modified_major_triad2(root):
+    return [root-3, root, root + 4, root + 7, root+10]
+    
 def minor_triad(root):
     return [root, root + 3, root + 7]
 
