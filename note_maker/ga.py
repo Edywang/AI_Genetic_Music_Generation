@@ -49,7 +49,7 @@ def make_song(note_count):
 
 # generate_MIDI must be provided a __list__ of songs. 
 # It will add each song to an additional track of a MIDIFile object, and return that MIDIFile.
-def generate_MIDI(songs, channel=0, tracks=1, duration=1, times=[0], tempos=[60], volume=100)
+def generate_MIDI(songs, channel=0, tracks=1, duration=1, times=[0], tempos=[60], volume=100):
     # degrees  = [60, 62, 64, 65, 67, 69, 71] # MIDI note number in the 5th octave
 
     MyMIDI = MIDIFILE(tracks)
