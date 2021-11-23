@@ -114,6 +114,9 @@ def checkFitness(song):
 #    second non-chorus part (I am not a music theory guy) would sound like XYXY 
 #    but all chorus sounds like LMNO LMNO LMNO LMNO
 
+# TODO: Create the base, 4 notes (not played at once) that then get repeated for the rest of the song (1 second per note)
+# This will then be overlayed with the seperate notes that are the main song that get played at different times (can have 1-4 notes played per base at different times)
+
 '''
 for pitch in degrees:
     MyMIDI.addNote(track, channel, pitch, time, duration, volume)
@@ -151,3 +154,12 @@ write_song_to_file(myMidi,"test.mid")
 #checkFitness(song)
 
 
+'''
+time = 0
+loop:
+    x = random.random(0,1)
+    add base
+    time = time + x
+    add single note
+    time = time + (1-x)
+'''
