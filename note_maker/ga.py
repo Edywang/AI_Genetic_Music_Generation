@@ -2,14 +2,21 @@ from midiutil import MIDIFile
 import random
 from _util import *
 
+
 NOTES_PER_SONG = 60
-C,CS,D,DS,E,F,FS,G,GS,A,AS,B = 0,1,2,3,4,5,6,7,8,9,10,11
+C_,CS_,D_,DS_,E_,F_,FS_,G_,GS_,A_,AS_,B_ = 0,1,2,3,4,5,6,7,8,9,10,11
+
+DEFAULT_TEMPO = 60
+USER_KEY = 0
+TEMPOS = [30, 60, 120]
+
 # add_song_to_MIDI does the legwork of adding a list of notes/chords to the MIDIFile object.
-def add_song_to_MIDI(MyMIDI, song, track, channel, time, duration, volume):
+def add_song_to_MIDI(MyMIDI, song, track, channel, time, duration, volume, steps):
     i = 0
+    # print(song)
     for val in song:    #so we don't forget to add the very first val in song
-        add_notes(MyMIDI, track, channel, val, time + i, duration, volume)
-        i = i + 1
+        add_notes(MyMIDI, track, channel, val, time + i, duration/steps, volume)
+        i += 1/steps
     return MyMIDI
 
 # write_song_to_file, provided a MIDIFile and file name, will write a MIDIFile to a file
@@ -27,11 +34,12 @@ def make_song(note_count):
     while notes_so_far != note_count:
         note_gen = []     #list of notes and chords
         for i in range(note_count*10): # loop note_count * 10 times producing random chords/notes
-            rando = random.randint(0,10)
-            if rando: # if rando != 0, add a chord
-                note_gen.append(random_common_chord(random_root()))
-            else: # otherwise, add a single note
-                note_gen.append([random_root()])
+            # rando = random.randint(0,10)
+            # if rando: # if rando != 0, add a chord
+            #     note_gen.append(random_common_chord(random_root()))
+            # else: # otherwise, add a single note
+            #     note_gen.append([random_root()])
+            note_gen.append([random_root()])
 
         if not notes_so_far:
             song.append(random.choice(note_gen))
@@ -47,17 +55,75 @@ def make_song(note_count):
                 
     return song
 
+def make_song_singles(note_count):
+    song = []
+    song.append([random_root()])
+    i = 1
+    while i < note_count:
+        rand_note = random_root()
+        if abs(song[-1][0] - rand_note) < 4:
+            song.append([rand_note])
+        else:
+            i -= 1
+        i += 1
+    return song
+
+def make_bass(note_count):
+    song = []
+    notes_so_far = 0
+    
+    root = random_root()
+    bl = bassline(root)
+    for i in range(15):
+        song += bl
+    return song
+
 # generate_MIDI must be provided a __list__ of songs. 
 # It will add each song to an additional track of a MIDIFile object, and return that MIDIFile.
-def generate_MIDI(songs, channel=0, tracks=1, duration=1, times=[0], tempos=[60], volume=100):
-    # degrees  = [60, 62, 64, 65, 67, 69, 71] # MIDI note number in the 5th octave
-
+def generate_MIDI(note_tracks, steps=[1], channel=0, duration=1, times=[0], tempos=[DEFAULT_TEMPO], volume=100):
+    tracks = len(note_tracks)
     MyMIDI = MIDIFile(tracks)
+    if len(times) == 1:
+        times = [times[0] for item in note_tracks]
+    if len(tempos) == 1:
+        tempos = [tempos[0] for item in note_tracks]
+    if len(steps) == 1:
+        steps = [steps[0] for item in note_tracks]
 
-    for i in range(0,len(songs)):
+    for i in range(0,len(note_tracks)):
+        # print(i)
         track = i
         MyMIDI.addTempo(track, times[i], tempos[i])
-        add_song_to_MIDI(MyMIDI, songs[i], track, channel, times[i], duration, volume)
+        step = steps[i]
+        if step == 'appreg':
+            t = times[i]
+            for cdx in range(len(note_tracks[i])):
+                chord = note_tracks[i][cdx]
+                add_song_to_MIDI(MyMIDI, chord, track, channel, t + cdx, duration, volume, len(chord))
+        else:
+            add_song_to_MIDI(MyMIDI, note_tracks[i], track, channel, times[i], duration, volume, steps[i])
+
+    return MyMIDI
+
+# def add_appreg_to_MIDI(s_appreg, steps=[1], channel=0, duration=1, times=[0], tempos=[DEFAULT_TEMPO], volume=100):
+
+# TODO please make better code
+
+#     return MyMIDI
+
+def generate_MIDI_with_bass(song, bass, channel=0, tracks=2, duration=1, times=[0], tempos=[60], volume=100):
+    MyMIDI = MIDIFile(tracks)
+    MyMIDI.addTempo(0, 0, 60)
+    
+    add_song_to_MIDI(MyMIDI, song, 0, 0, 0, duration, volume, 4)
+
+    MyMIDI.addTempo(1, 0, 60)
+    # for i in range(15):
+    #     add_prog(MyMIDI, 1, 0, bass, i, duration, volume)
+    # add_prog(MyMIDI, 1, 0, bass, 0, duration, volume)
+    for i in range(tempos[0]):
+        add_song_to_MIDI(MyMIDI, bass, 1, 0, i*4, duration, volume, 1)
+
 
     return MyMIDI
 
@@ -75,17 +141,11 @@ def combine_songs(song1, song2, split_pt=-1):
     song2_split = song2[:split_pt] + song1[split_pt:]
     return song1_split, song2_split
 
-
-# def combine_multitempo_songs(song1, song2, tempo1, tempo2, start1, start2, split_pt=-1)
-# TODO, if you want: 
-# takes two note lists and their respective tempos, and combines them into a single MIDIFile object
-# did we wanna combine them by alternating notes? Or just by putting in on the end
-# there is a note limit (of three) with midi, so we might already be at the max before starting
-def combine_multitempo_songs(song1, song2, tempo1, tempo2, start1, start2, split_pt=-1):
-    pass
-
-# TODO 
-# initial: create X songs using make_song
+def mutate(song): # has a MUTATE_CHANCE chance of giving back a randomized new song
+    MUTATE_CHANCE = 0.9
+    if random.random() <= MUTATE_CHANCE:
+        return make_song_singles(len(song))
+    return song
 
 # in a loop:
     # check the fitness of each one, sort them in order of fitness (highest to lowest?)
@@ -144,10 +204,19 @@ Fitness stuff:
 
     We also want to limit repititon of stuff too
 '''
-song = [major_triad(50),modified_major_triad1(50),modified_major_triad2(50)]
-myMidi = generate_MIDI([song])
-write_song_to_file(myMidi,"test.mid")
-#song = make_song(NOTES_PER_SONG)    #creates song
-#checkFitness(song)
+# song = []
+# s_appreg = appreg(chord, MyMIDI, track, channel, time, duration, volume)
+song = make_song_singles(NOTES_PER_SONG*4)    #creates song
+bass = bassline(note_in_octs_l(get_random_letter(), 2, 3))
+s_appreg = [random_common_chord(note_in_octs_n(n[0], 4, 5)) for n in bass]
+s_appreg = replace_item_with_list(s_appreg)
+print(song)
+print(bass)
+print(s_appreg)
+bass *= int(DEFAULT_TEMPO/4)
+s_appreg *= int(DEFAULT_TEMPO/4)
 
+myMidi = generate_MIDI([song, bass, s_appreg], steps=[len(bass)/int(DEFAULT_TEMPO/4), 1, 'appreg'])
+write_song_to_file(myMidi,"test1.mid")
 
+# all appreg should have 4 or 3 so it doesn't sound awful

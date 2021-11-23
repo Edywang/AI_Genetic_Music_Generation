@@ -35,8 +35,6 @@ def add_notes(midi, track, channel, notes, time, duration, volume):
 
 #we don't need this function tho
 def random_note():
-    #lst = list(notes.items())
-    #return (random.choice(lst)[1] + 60)
     return (random_root())
 
 def random_common_chord(root):
@@ -179,3 +177,24 @@ def checkingOverlap(n1, n2):
             if n >= second[i] and n <= second[i+1]:
                 return True
     return False
+
+def bassline(root):
+    return [[root], [root-4], [root-9], [root-5]]
+
+def get_random_letter():
+    return random.choice(list(note_names()))
+
+def note_in_octs_l(Letter, min_oct, max_oct):
+    return notes.get(Letter) + (random.randint(min_oct, max_oct) * 12)
+
+def note_in_octs_n(num, min_oct, max_oct):
+    print(num)
+    num %= 12
+    return num + (random.randint(min_oct, max_oct) * 12)
+
+def replace_item_with_list(listlist):
+    for idx in range(len(listlist)):
+        lst = listlist[idx]
+        for jdx in range(len(lst)):
+            lst[jdx] = [lst[jdx]]
+    return listlist
