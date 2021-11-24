@@ -178,8 +178,27 @@ def checkingOverlap(n1, n2):
                 return True
     return False
 
-def bassline(root):
+
+
+def random_prog(root):
+    return random.choice(prog)(root)
+
+# progression pattern
+# TODO: Add more patterns
+def i_vi_iii_v(root):
     return [[root], [root-4], [root-9], [root-5]]
+
+def i_vi_iv_v(root):
+    return [[root], [root-4], [root-7], [root-5]]
+
+def i_v_vi_iv(root):
+    return[[root], [root-5], [root-3], [root-7]]
+
+def i_v_vi_iii_iv_i_iv_v(root):
+    return[[root], [root-5], [root-3], [root-8], [root-7], [root], [root-7], [root-5]]
+
+prog = [i_vi_iii_v, i_vi_iv_v, i_v_vi_iv, i_v_vi_iii_iv_i_iv_v]
+
 
 def get_random_letter():
     return random.choice(list(note_names()))
