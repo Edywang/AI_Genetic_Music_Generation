@@ -207,8 +207,8 @@ Fitness stuff:
 # song = []
 # s_appreg = appreg(chord, MyMIDI, track, channel, time, duration, volume)
 song = make_song_singles(NOTES_PER_SONG*4)    #creates song
-bass = random_prog(note_in_octs_l(get_random_letter(), 2, 3))
-s_appreg = [random_common_chord(note_in_octs_n(n[0], 4, 5)) for n in bass]
+bass = random_minor_prog(note_in_octs_l(get_random_letter(), 2, 3))     # Indicate key here(major or minor)
+s_appreg = [random_minor_chord(note_in_octs_n(n[0], 4, 5)) for n in bass]
 s_appreg = replace_item_with_list(s_appreg)
 print(song)
 print(bass)

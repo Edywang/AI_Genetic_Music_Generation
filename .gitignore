@@ -1,3 +1,4 @@
 *.wav
 *.mp3
 note_maker/__pycache__
+/note_maker/test1.mid

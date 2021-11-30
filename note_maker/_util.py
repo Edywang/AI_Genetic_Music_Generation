@@ -40,8 +40,14 @@ def random_note():
 def random_common_chord(root):
     return random.choice(common_chords)(root)
 
+def random_major_chord(root):
+    return random.choice(major_chords)(root)
+
+def random_minor_chord(root):
+    return random.choice(minor_chords)(root)
+
 def major_triad(root):
-    return [root, root + 4, root + 7]
+    return [root, root + 4, root + 7, root + 12]
 
 def modified_major_triad1(root):
     return [root-3, root, root + 4, root + 7]
@@ -50,7 +56,7 @@ def modified_major_triad2(root):
     return [root-3, root, root + 4, root + 7, root+10]
     
 def minor_triad(root):
-    return [root, root + 3, root + 7]
+    return [root, root + 3, root + 7, root + 12]
 
 def major_seventh(root):
     return [root, root + 4, root + 7, root + 11]
@@ -74,15 +80,17 @@ def augmented_seventh(root):
     return [root, root + 4, root + 8, root + 10]
 
 def suspended_fourth(root):
-    return [root, root + 5, root + 7]
+    return [root, root + 5, root + 7, root + 12]
 
 def suspended_second(root):
-    return [root, root + 1, root + 7]
+    return [root, root + 1, root + 7, root + 12]
 
 common_chords = [major_triad, minor_triad, major_seventh, minor_seventh, major_sixth, minor_sixth, dominant_seventh, diminished_seventh, augmented_seventh, suspended_fourth, suspended_second]
+major_chords = [major_triad, major_sixth, major_seventh, dominant_seventh, augmented_seventh, suspended_fourth, suspended_second]
+minor_chords = [minor_triad, minor_sixth, minor_seventh, diminished_seventh]
 
 def major_seventh_suspended(root):
-    return [root, root + 7, root + 11]
+    return [root, root + 7, root + 11, root + 12]
 
 def dominant_seventh_flat_five(root):
     return [root, root + 4, root + 6, root + 10]
@@ -180,8 +188,11 @@ def checkingOverlap(n1, n2):
 
 
 
-def random_prog(root):
-    return random.choice(prog)(root)
+def random_major_prog(root):
+    return random.choice(major_prog)(root)
+
+def random_minor_prog(root):
+    return random.choice(minor_prog)(root)
 
 # progression pattern
 # TODO: Add more patterns
@@ -197,7 +208,8 @@ def i_v_vi_iv(root):
 def i_v_vi_iii_iv_i_iv_v(root):
     return[[root], [root-5], [root-3], [root-8], [root-7], [root], [root-7], [root-5]]
 
-prog = [i_vi_iii_v, i_vi_iv_v, i_v_vi_iv, i_v_vi_iii_iv_i_iv_v]
+minor_prog = [i_vi_iii_v, i_vi_iv_v]
+major_prog = [i_v_vi_iv, i_v_vi_iii_iv_i_iv_v]
 
 
 def get_random_letter():
