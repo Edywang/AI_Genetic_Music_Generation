@@ -28,7 +28,7 @@ class Track:
         if note_type == 'bass':
             self.steps = 1
         elif note_type == 'melody':
-            self.steps = metadata['MELODY_NOTES_PB']
+            self.steps = 'melody'
         else:
             self.steps = 4
 
@@ -64,6 +64,7 @@ class Song_Generator:
     def __init__(self, user_key_major, tempo=metadata['TEMPO']):
         metadata['USER_KEY_MAJOR'] = user_key_major
         metadata['TEMPO'] = tempo
+        metadata['MELODY_NOTES_PB'] = 2 * random.randint(8, 16)
 
     def create_MIDI(self, verse_list, bridge_list=[], filename='my_song.mid'):
         print(metadata['TEMPO'])
@@ -103,13 +104,17 @@ class Song_Generator:
             midi.addNote(track, channel, note, time, duration, volume)
 
     # self._add_song_to_MIDI does the legwork of adding a list of notes/chords to the MIDIFile object.
-    def _add_song_to_MIDI(self, MyMIDI, song, track, channel, time, duration, volume, steps):
+    def _add_song_to_MIDI(self, MyMIDI, song, track, channel, time, duration, volume):
         if MyMIDI == None:
             return MyMIDI
         i = 0
-        for val in song:    #so we don't forget to add the very first val in song
-            self._add_notes(MyMIDI, track, channel, val, time + i, duration/steps, volume)
-            i += 1/steps
+        for note_list in song.notes:
+            steps = song.steps
+            if song.steps == 'melody':
+                steps = len(note_list)
+            for val in note_list:    #so we don't forget to add the very first val in song
+                self._add_notes(MyMIDI, track, channel, val, time + i, duration/steps, volume)
+                i += 1/steps
         return MyMIDI
 
     # write_song_to_file, provided a MIDIFile and file name, will write a MIDIFile to a file
@@ -152,15 +157,8 @@ class Song_Generator:
             track_idx=i # 0,1,2 for melody,bass,appreg respectively
             track = note_tracks[track_idx]
             MyMIDI.addTempo(track_idx, 0, tempo)
-            step_count = track.steps
 
-            if track.note_type == 'appregio': #appregios are ~special~
-                for cdx in range(len(track.notes)):
-                    chord = track.notes[cdx]
-                    self._add_song_to_MIDI(MyMIDI, chord, track_idx, channel, cdx, duration, volume, len(chord))
-            
-            else:
-                self._add_song_to_MIDI(MyMIDI, track.notes, track_idx, channel, 0, duration, volume, step_count)
+            self._add_song_to_MIDI(MyMIDI, track, track_idx, channel, 0, duration, volume)
 
         return MyMIDI
 
@@ -170,13 +168,18 @@ class Chunk_Generator:
     # The function for generating an individual chunk of song
     def make_chunk(self, root=metadata['ROOT'], type='verse',verbose=False):
         if type == 'verse':
-            bass = self._get_random_prog(major=metadata['USER_KEY_MAJOR'])
+            bass = [self._get_random_prog(major=metadata['USER_KEY_MAJOR'])]
             track_type = 'verse'
         else:
-            bass = self._get_random_bridge(major=metadata['USER_KEY_MAJOR'])
+            bass = [self._get_random_bridge(major=metadata['USER_KEY_MAJOR'])]
             track_type = 'bridge'
-        melody = self._make_melody(len(bass)*metadata['MELODY_NOTES_PB'], metadata['USER_KEY_MAJOR'], verbose=verbose)
-        appregio = self._get_random_chord(bass, major=metadata['USER_KEY_MAJOR'])
+
+        if (len(bass[0]) == 4) and random.random() > 0.5:
+            metadata['MELODY_NOTES_PB'] /= 2
+            metadata['MELODY_NOTES_PB'] += metadata['MELODY_NOTES_PB'] % 2
+
+        melody = self._make_melody(len(bass[0]), metadata['USER_KEY_MAJOR'], verbose=verbose)
+        appregio = self._get_random_chord(bass[0], major=metadata['USER_KEY_MAJOR'])
         if verbose:
             print('melody: ', melody)
             print('bass: ', bass)
@@ -213,27 +216,30 @@ class Chunk_Generator:
     def _get_random_drums(self):
         return [[random.choice(1,1,1,1,1,1,1,3)], [random.choice(1,1,3)], [random.choice(1,1,1,1,1,1,1,3)], [random.choice(1,1,3)]]
 
-    def _make_melody(self, note_count, major, verbose=False):
+    def _make_melody(self, bass_count, major, verbose=False):
         song = []
         next_note = random.randint(4, 9)
         if verbose:
             print(next_note)
-            print(note_count)
+            # print(note_count)
             print(major)
-        song.append([metadata['ROOT']])
-        i = 1
-        while i < note_count:
-            rand_note = random_root()
-            if verbose:
-                print(str(i) + ':',str(rand_note % 12), major_notes(metadata['ROOT'] % 12))
-            # if abs(song[-1][0] - rand_note) < next_note:
-            if major and rand_note % 12 in major_notes(metadata['ROOT'] % 12):
-                song.append([rand_note])
-            elif not major and rand_note % 12 in minor_notes(metadata['ROOT'] % 12):
-                song.append([rand_note])
-            else:
-                i -= 1
-            i += 1
+
+        for b_note in range(bass_count):
+            song.append([])
+            note_count = 2 ** random.randint(1, 3)
+            i = 1
+            while i <= note_count:
+                rand_note = random_root()
+                if verbose:
+                    print(str(i) + ':',str(rand_note % 12), major_notes(metadata['ROOT'] % 12))
+                # if abs(song[-1][0] - rand_note) < next_note:
+                if major and rand_note % 12 in major_notes(metadata['ROOT'] % 12):
+                    song[b_note].append([rand_note])
+                elif not major and rand_note % 12 in minor_notes(metadata['ROOT'] % 12):
+                    song[b_note].append([rand_note])
+                else:
+                    i -= 1
+                i += 1
         return song
 
     def mutate_chunk(self, song): # has a MUTATE_CHANCE chance of giving back a randomized new song

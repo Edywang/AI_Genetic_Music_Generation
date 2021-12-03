@@ -11,7 +11,7 @@ if __name__ == '__main__':
     sg = Song_Generator(key_in_major, tempo)
     cg = Chunk_Generator()
 
-    song_obj_v = cg.make_chunk(type='verse',verbose=False)
+    song_obj_v = cg.make_chunk(type='verse',verbose=True)
     song_obj_b = cg.make_chunk(type='bridge',verbose=False)
 
     sg.create_MIDI(verse_list=[song_obj_v])
